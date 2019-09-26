@@ -1,5 +1,6 @@
 package org.launchcode.controllers;
 
+import org.launchcode.models.*;
 import org.launchcode.models.forms.JobForm;
 import org.launchcode.models.data.JobData;
 import org.springframework.stereotype.Controller;
@@ -10,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
 
-/**
- * Created by LaunchCode
- */
 @Controller
 @RequestMapping(value = "job")
 public class JobController {
@@ -23,7 +21,9 @@ public class JobController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String index(Model model, int id) {
 
-        // TODO #1 - get the Job with the given ID and pass it into the view
+
+        Job job = jobData.findById(id);
+        model.addAttribute("job", job);
 
         return "job-detail";
     }
@@ -37,11 +37,29 @@ public class JobController {
     @RequestMapping(value = "add", method = RequestMethod.POST)
     public String add(Model model, @Valid JobForm jobForm, Errors errors) {
 
-        // TODO #6 - Validate the JobForm model, and if valid, create a
         // new Job and add it to the jobData data store. Then
         // redirect to the job detail view for the new Job.
 
-        return "";
+
+        if (jobForm.getName().length() == 0) {
+            model.addAttribute("errors", errors);
+            return "new-job";
+        }
+
+        String name = jobForm.getName(); // name from the form
+
+        Employer employer = jobData.getEmployers().findById(jobForm.getEmployerId());
+        Location location = jobData.getLocations().findById(jobForm.getLocationId());
+        CoreCompetency coreCompetency = jobData.getCoreCompetencies().findById(jobForm.getCoreCompetencyId());
+        PositionType positionType = jobData.getPositionTypes().findById(jobForm.getPositionTypeId());
+
+        Job newJob = new Job(name, employer, location, positionType, coreCompetency);
+
+        jobData.add(newJob);
+
+        Integer idNum = newJob.getId(); // get what is the ID for the created job
+        model.addAttribute("job", newJob); // pass the job object
+        return "redirect:/job?id=" + idNum; // create a link fo the exact job
 
     }
 }

@@ -14,10 +14,12 @@ public enum JobFieldType {
     private final String name;
 
     JobFieldType(String name) {
+
         this.name = name;
     }
 
     public String getName() {
+
         return name;
     }
 
